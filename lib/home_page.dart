@@ -52,6 +52,7 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       backgroundColor: Colors.blueGrey,
       floatingActionButton: FloatingActionButton(
+        backgroundColor: Colors.grey,
         onPressed: () {
           showDialog(
             context: context,
