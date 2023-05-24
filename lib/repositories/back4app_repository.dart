@@ -1,3 +1,4 @@
+// ignore_for_file: unused_local_variable
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
@@ -20,7 +21,6 @@ class Back4appRepository {
     );
     //print(response.statusCode);
     return response.body;
-    //exception
   }
 
   Future<Back4appModel> getDbCep() async {
@@ -34,10 +34,11 @@ class Back4appRepository {
     return Back4appModel.fromJson(json);
   }
 
-  Future<dynamic> deleteById(String id) async {
+  Future<void> deleteById(String id) async {
     var response = await http.delete(
       Uri.parse('$_baseUrl/Enderecos/$id'),
+      headers: _headers,
     );
-    return response.statusCode == 200;
+    //print(response.statusCode);
   }
 }

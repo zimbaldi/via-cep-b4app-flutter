@@ -50,6 +50,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.blueGrey,
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           showDialog(
@@ -60,11 +61,11 @@ class _HomePageState extends State<HomePage> {
                   'Consultar CEP',
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
-                content: Column(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: TextFormField(
+                content: SizedBox(
+                  height: 180,
+                  child: Column(
+                    children: [
+                      TextFormField(
                         inputFormatters: [maskFormatter],
                         decoration: const InputDecoration(
                           border: OutlineInputBorder(),
@@ -74,39 +75,62 @@ class _HomePageState extends State<HomePage> {
                         keyboardType: TextInputType.number,
                         controller: cepController,
                       ),
-                    ),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 40,
-                      child: ElevatedButton(
-                        onPressed: () async {
-                          var cep = cepController.text;
-                          viaCepModel = await viaCepRepository.getCep(cep);
-                          var rua = viaCepModel.logradouro!;
-                          Navigator.pop(_);
-
-                          //TODO verificar se já existe no DB
-                          var address = AddressModel(cep: cep, rua: rua);
-                          var response = await b4aRepository.addCep(address);
-                          if (response == null) return;
-                          debugPrint('success on save to DB');
-                          loadDbList();
-                          setState(() {});
-                        },
-                        child: const Text('Buscar'),
+                      const SizedBox(
+                        height: 10,
                       ),
-                    ),
-                  ],
+                      SizedBox(
+                        width: double.infinity,
+                        height: 50,
+                        child: ElevatedButton(
+                          onPressed: () async {
+                            var cep = cepController.text;
+                            viaCepModel = await viaCepRepository.getCep(cep);
+                            var rua = viaCepModel.logradouro!;
+                            if (!mounted) return;
+                            Navigator.pop(_);
+                            cepController.text = '';
+
+                            //TODO verificar se já existe no DB
+                            var address = AddressModel(cep: cep, rua: rua);
+                            var response = await b4aRepository.addCep(address);
+                            if (response == null) return;
+                            debugPrint('success on save to DB');
+                            loadDbList();
+                            setState(() {});
+                          },
+                          child: const Text('Buscar'),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               );
             },
           );
         },
-        child: Icon(Icons.add),
+        child: const Icon(
+          Icons.add,
+          color: Colors.black,
+        ),
       ),
       appBar: AppBar(
         backgroundColor: Colors.grey,
-        title: const Text('Home'),
+        title: const Text(
+          'Consultar CEP',
+          style: TextStyle(color: Colors.black),
+        ),
+        actions: [
+          IconButton(
+              onPressed: () async {
+                loadDbList();
+                //print(b4aModel.results![0].rua);
+                setState(() {});
+              },
+              icon: const Icon(
+                Icons.replay,
+                color: Colors.black,
+              ))
+        ],
       ),
       body: SingleChildScrollView(
         child: ConstrainedBox(
@@ -114,74 +138,13 @@ class _HomePageState extends State<HomePage> {
               BoxConstraints(maxHeight: MediaQuery.of(context).size.height),
           child: Column(
             children: [
-              const Padding(
-                padding: EdgeInsets.only(top: 8.0),
-                child: Text(
-                  'Consultar CEP',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                ),
-              ),
-              // Padding(
-              //   padding: const EdgeInsets.all(8.0),
-              //   child: TextFormField(
-              //     inputFormatters: [maskFormatter],
-              //     decoration: const InputDecoration(
-              //       border: OutlineInputBorder(),
-              //       hintText: 'CEP',
-              //     ),
-              //     maxLength: 9,
-              //     keyboardType: TextInputType.number,
-              //     controller: cepController,
-              //   ),
-              // ),
-              const SizedBox(
-                height: 20,
-              ),
-              viaCepModel.logradouro == null
-                  ? const Text('')
-                  : Text('${viaCepModel.logradouro}'),
+              // viaCepModel.logradouro == null
+              //     ? const Text('')
+              //     : Text('${viaCepModel.logradouro}'),
               // const SizedBox(
               //   height: 20,
               // ),
-              // SizedBox(
-              //   width: double.infinity,
-              //   height: 40,
-              //   child: ElevatedButton(
-              //     onPressed: () async {
-              //       var cep = cepController.text;
-              //       viaCepModel = await viaCepRepository.getCep(cep);
-              //       var rua = viaCepModel.logradouro!;
 
-              //       //TODO verificar se já existe no DB
-              //       var address = AddressModel(cep: cep, rua: rua);
-              //       var response = await b4aRepository.addCep(address);
-              //       if (response == null) return;
-              //       debugPrint('success on save to DB');
-              //       setState(() {});
-              //     },
-              //     child: const Text('Buscar'),
-              //   ),
-              // ),
-              const SizedBox(
-                height: 20,
-              ),
-              SizedBox(
-                width: double.infinity,
-                height: 40,
-                child: ElevatedButton(
-                  onPressed: () async {
-                    //Colocar no initstate
-                    loadDbList();
-                    //print(b4aModel.results![0].rua);
-
-                    setState(() {});
-                  },
-                  child: const Text('Buscar DB'),
-                ),
-              ),
-              const SizedBox(
-                height: 20,
-              ),
               //Testes de lista do DB
               // b4aModel.results == null
               //     ? const Text('')
@@ -191,7 +154,9 @@ class _HomePageState extends State<HomePage> {
               //   height: 20,
               // ),
               // Text('${b4aModel.results?.length}'),
-
+              const SizedBox(
+                height: 10,
+              ),
               Expanded(
                 child: b4aModel.results == null
                     ? const Center(
@@ -202,12 +167,27 @@ class _HomePageState extends State<HomePage> {
                         itemBuilder: (context, index) {
                           //print(addresses.length);
                           var addressList = b4aModel.results?[index];
-                          return Card(
-                            child: Column(
-                              children: [
-                                Text(addressList!.rua),
-                                Text(addressList.cep),
-                              ],
+                          return Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 8.0),
+                            child: SizedBox(
+                              height: 50,
+                              child: Dismissible(
+                                key: UniqueKey(),
+                                onDismissed: (direction) async {
+                                  await b4aRepository.deleteById(
+                                      addressList.objectId.toString());
+                                  loadDbList();
+                                },
+                                child: Card(
+                                  child: Column(
+                                    children: [
+                                      Text(addressList!.rua),
+                                      Text(addressList.cep),
+                                    ],
+                                  ),
+                                ),
+                              ),
                             ),
                           );
                         },
